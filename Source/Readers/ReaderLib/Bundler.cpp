@@ -98,11 +98,14 @@ void Bundler::CreateChunkDescriptions()
 
             if (m_mbDefiningDeserializer != std::numeric_limits<size_t>::max())
             {
-                // Pick up the sequence from the main deserializer.
-                if (m_deserializers[m_mbDefiningDeserializer]->GetSequenceInfo(sequenceDescriptions[sequenceIndex], s))
-                    sequenceSamples = s.m_numberOfSamples;
-                else
-                    invalid.insert(sequenceIndex);
+                if (m_mbDefiningDeserializer != 0)
+                {
+                    // Pick up the sequence from a particular deserializer.
+                    if (m_deserializers[m_mbDefiningDeserializer]->GetSequenceInfo(sequenceDescriptions[sequenceIndex], s))
+                        sequenceSamples = s.m_numberOfSamples;
+                    else
+                        invalid.insert(sequenceIndex);
+                }
             }
             else
             {
@@ -166,7 +169,7 @@ void Bundler::SequenceInfosForChunk(ChunkIdType chunkId, std::vector<SequenceInf
     m_primaryDeserializer->SequenceInfosForChunk(original.m_id, sequences);
 
     std::vector<SequenceInfo> result;
-    if (m_takePrimarySequenceLength) // No need to consult other deserializers.
+    if (m_takePrimarySequenceLength || m_mbDefiningDeserializer == 0) // No need to consult other deserializers.
     {
         // Do cleansing.
         result.reserve(sequences.size());
